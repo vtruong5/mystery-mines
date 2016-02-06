@@ -15,38 +15,125 @@ window.onload = function() {
     
     var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
     
+    
     function preload() {
-        // Load an image and call it 'logo'.
-        game.load.image( 'logo', 'assets/phaser.png' );
+
+        game.load.image('sky', 'assets/sky.png');
+        game.load.image('ground', 'assets/platform.png');
+        game.load.image('star', 'assets/star.png');
+        game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+        
+        game.load.image('player', 'assets/star.png');
+        game.load.spritesheet('veggies', 'assets/fruitnveg32wh37.png', 32, 32);
+        
+
     }
     
-    var bouncy;
-    
+    var sprite;
+    var group;
+    var cursors;
+    var platforms;
+    var collect = 0;
+
     function create() {
-        // Create a sprite at the center of the screen using the 'logo' image.
-        bouncy = game.add.sprite( game.world.centerX, game.world.centerY, 'logo' );
-        // Anchor the sprite at its center, as opposed to its top-left corner.
-        // so it will be truly centered.
-        bouncy.anchor.setTo( 0.5, 0.5 );
+
+        game.physics.startSystem(Phaser.Physics.ARCADE);
         
-        // Turn on the arcade physics engine for this sprite.
-        game.physics.enable( bouncy, Phaser.Physics.ARCADE );
-        // Make it bounce off of the world bounds.
-        bouncy.body.collideWorldBounds = true;
+        //background
+        game.add.sprite(0, 0, 'sky');
         
-        // Add some text using a CSS style.
-        // Center it in X, and position its top 15 pixels from the top of the world.
-        var style = { font: "25px Verdana", fill: "#9999ff", align: "center" };
-        var text = game.add.text( game.world.centerX, 15, "Build something awesome.", style );
-        text.anchor.setTo( 0.5, 0.0 );
+        //platforms
+
+        //  The platforms group contains the ground and the 2 ledges we can jump on
+        platforms = game.add.group();
+
+        //  We will enable physics for any object that is created in this group
+        platforms.enableBody = true;
+
+        // Here we create the ground.
+        var ground = platforms.create(0, game.world.height - 5, 'ground');
+
+        //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+        ground.scale.setTo(2, 2);
+
+        //  This stops it from falling away when you jump on it
+        ground.body.immovable = true;
+
+        //  Now let's create ledges
+        var ledge = platforms.create(-50, 75, 'ground');
+        ledge.body.immovable = true;
+        ledge = platforms.create(450, 75, 'ground');
+        ledge.body.immovable = true;
+
+        //player
+        sprite = game.add.sprite(400, 40, 'player');
+        game.physics.arcade.enable(sprite);
+ 
+        //items
+            group = game.add.physicsGroup();
+
+            for (var i = 0; i < 500; i++)
+            {
+                var c = group.create(game.rnd.between(0, 770), game.rnd.between(100, 570), 'veggies', game.rnd.between(0, 35));
+                c.body.mass = -100;
+            }
+
+            for (var i = 0; i < 5; i++)
+            {
+                var c = group.create(game.rnd.between(0, 770), game.rnd.between(400, 570), 'veggies', 17);
+            }
+
+            cursors = game.input.keyboard.createCursorKeys();
+    }
+
+    function update() {
+        if (game.physics.arcade.collide(sprite, group, collisionHandler, processHandler, this))
+                {
+                    console.log('boom');
+                }
+        game.physics.arcade.collide(sprite, platforms);
+        sprite.body.velocity.x = 0;
+        sprite.body.velocity.y = 0;
+        if (cursors.left.isDown)
+        {
+            sprite.body.velocity.x = -200;
+        }
+        else if (cursors.right.isDown)
+        {
+            sprite.body.velocity.x = 200;
+        }
+
+        if (cursors.up.isDown)
+        {
+            sprite.body.velocity.y = -200;
+        }
+        else if (cursors.down.isDown)
+        {
+            sprite.body.velocity.y = 200;
+        }
+
+
+        if (collect >= 5){
+            game.add.text(16, 16, 'YOU\'RE RICH!!', { font: '18px Arial', fill: '#ffffff' });
+            //play sound
+        }
+ 
     }
     
-    function update() {
-        // Accelerate the 'logo' sprite towards the cursor,
-        // accelerating at 500 pixels/second and moving no faster than 500 pixels/second
-        // in X or Y.
-        // This function returns the rotation angle that makes it visually match its
-        // new trajectory.
-        bouncy.rotation = game.physics.arcade.accelerateToPointer( bouncy, this.game.input.activePointer, 500, 500, 500 );
+    function processHandler (player, veg) {
+
+        return true;
+
     }
+
+    function collisionHandler (player, veg) {
+
+        if (veg.frame == 17)
+        {
+            veg.kill();
+            collect = collect + 1;
+        }
+
+    }
+
 };
