@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
     // You might want to start with a template that uses GameStates:
     //     https://github.com/photonstorm/phaser/tree/master/resources/Project%20Templates/Basic
     
@@ -13,20 +13,16 @@ window.onload = function() {
     
     "use strict";
     
-    var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
+    var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
     
     
     function preload() {
 
-        game.load.image('sky', 'assets/sky.png');
-        game.load.image('ground', 'assets/platform.png');
-        game.load.image('star', 'assets/star.png');
-        game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
-        
-        game.load.image('player', 'assets/star.png');
-        game.load.spritesheet('veggies', 'assets/fruitnveg32wh37.png', 32, 32);
-        
-
+        game.load.image('sky', 'assets/bg.png');
+        game.load.image('ground', 'assets/platform.png');     
+        game.load.image('player', 'assets/miner.png');
+        game.load.spritesheet('veggies', 'assets/underground.png', 32, 32);
+        game.load.audio('beep', 'assets/sound1.wav');
     }
     
     var sprite;
@@ -34,6 +30,7 @@ window.onload = function() {
     var cursors;
     var platforms;
     var collect = 0;
+    var sound;
 
     function create() {
 
@@ -42,8 +39,10 @@ window.onload = function() {
         //background
         game.add.sprite(0, 0, 'sky');
         
+        //sound
+        sound = game.add.audio('beep');
+        
         //platforms
-
         //  The platforms group contains the ground and the 2 ledges we can jump on
         platforms = game.add.group();
 
@@ -51,7 +50,7 @@ window.onload = function() {
         platforms.enableBody = true;
 
         // Here we create the ground.
-        var ground = platforms.create(0, game.world.height - 5, 'ground');
+        var ground = platforms.create(0, game.world.height, 'ground');
 
         //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
         ground.scale.setTo(2, 2);
@@ -75,12 +74,13 @@ window.onload = function() {
             for (var i = 0; i < 500; i++)
             {
                 var c = group.create(game.rnd.between(0, 770), game.rnd.between(100, 570), 'veggies', game.rnd.between(0, 35));
+
                 c.body.mass = -100;
             }
 
             for (var i = 0; i < 5; i++)
             {
-                var c = group.create(game.rnd.between(0, 770), game.rnd.between(400, 570), 'veggies', 17);
+                var c = group.create(game.rnd.between(0, 770), game.rnd.between(400, 570), 'veggies', 36);
             }
 
             cursors = game.input.keyboard.createCursorKeys();
@@ -114,8 +114,7 @@ window.onload = function() {
 
 
         if (collect >= 5){
-            game.add.text(16, 16, 'YOU\'RE RICH!!', { font: '18px Arial', fill: '#ffffff' });
-            //play sound
+            game.add.text(16, 16, 'YOU\'RE RICH!!', { font: '20px Arial', fill: '#ffffff' });
         }
  
     }
@@ -128,9 +127,10 @@ window.onload = function() {
 
     function collisionHandler (player, veg) {
 
-        if (veg.frame == 17)
+        if (veg.frame == 36)
         {
             veg.kill();
+            sound.play();
             collect = collect + 1;
         }
 
