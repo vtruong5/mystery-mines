@@ -65,22 +65,20 @@ window.onload = function () {
         ledge.body.immovable = true;
 
         //player
-        sprite = game.add.sprite(400, 40, 'player');
+        sprite = game.add.sprite(200, 35, 'player');
         game.physics.arcade.enable(sprite);
  
         //items
             group = game.add.physicsGroup();
-
+            for (var i = 0; i < 10; i++)
+            {
+                var c = group.create(game.rnd.between(0, 770), game.rnd.between(300, 570), 'veggies', 36);
+            }
             for (var i = 0; i < 500; i++)
             {
                 var c = group.create(game.rnd.between(0, 770), game.rnd.between(100, 570), 'veggies', game.rnd.between(0, 35));
 
                 c.body.mass = -100;
-            }
-
-            for (var i = 0; i < 5; i++)
-            {
-                var c = group.create(game.rnd.between(0, 770), game.rnd.between(400, 570), 'veggies', 36);
             }
 
             cursors = game.input.keyboard.createCursorKeys();
@@ -113,8 +111,8 @@ window.onload = function () {
         }
 
 
-        if (collect >= 5){
-            game.add.text(16, 16, 'YOU\'RE RICH!!', { font: '20px Arial', fill: '#ffffff' });
+        if (collect >= 10){
+            game.add.text(16, 16, 'Congratulations!! You\'re Rich!!', { font: '20px Arial', fill: '#ffffff' });
         }
  
     }
