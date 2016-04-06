@@ -32,6 +32,7 @@ window.onload = function () {
         game.load.image('food', 'assets/food.png');
         game.load.image('map', 'assets/map_piece.png');
         game.load.image('final', 'assets/end_treasure.png');
+        game.load.image('bar', 'assets/bar.png');
         
     }
     
@@ -58,10 +59,11 @@ window.onload = function () {
     var foods;
     var map;
     var endPrize;
-    //var endX = game.rnd.between(0, 99)*32;
-    //var endY = game.rnd.between(0, 99)*32;
-    var endX = 1650;
-    var endY = 1650;
+    var endX = game.rnd.between(0, 99)*32;
+    var endY = game.rnd.between(0, 99)*32;
+    //var endX = 1650;
+    //var endY = 1650;
+    var bar;
     
     //animations
     var addAni;
@@ -69,7 +71,15 @@ window.onload = function () {
     
     //in game stats
     var mapPieceCount = 0;
-
+    var hunger = 3000;
+    var hungerMax = 5000;
+    var attention = 3000;
+    var attentionMax = 5000;
+    var score = 0;
+    
+    var gameover = false;
+    //var dirtCount = 0;
+    var time = 0;
     
     function create() {
         
@@ -92,15 +102,15 @@ window.onload = function () {
         
         //add map pieces
         map = game.add.physicsGroup();
-        //var piece = map.create(game.rnd.between(0, 50)*32,game.rnd.between(0, 50)*32, 'map');
-        //piece = map.create(game.rnd.between(49, 99)*32,game.rnd.between(0, 50)*32, 'map');
-        //piece = map.create(game.rnd.between(0, 50)*32,game.rnd.between(49, 99)*32, 'map');
-        //piece = map.create(game.rnd.between(49, 99)*32,game.rnd.between(49, 99)*32, 'map');
+        var piece = map.create(game.rnd.between(0, 50)*32,game.rnd.between(0, 50)*32, 'map');
+        piece = map.create(game.rnd.between(49, 99)*32,game.rnd.between(0, 50)*32, 'map');
+        piece = map.create(game.rnd.between(0, 50)*32,game.rnd.between(49, 99)*32, 'map');
+        piece = map.create(game.rnd.between(49, 99)*32,game.rnd.between(49, 99)*32, 'map');
  
-        var piece = map.create(1500,1500, 'map');
-        piece = map.create(1550, 1500, 'map');
-        piece = map.create(1600, 1500, 'map');
-        piece = map.create(1650, 1500, 'map');
+        //var piece = map.create(1500,1500, 'map');
+        //piece = map.create(1550, 1500, 'map');
+        //piece = map.create(1600, 1500, 'map');
+        //piece = map.create(1650, 1500, 'map');
         
         //add food
         foods = game.add.physicsGroup();
@@ -177,8 +187,14 @@ window.onload = function () {
         cursors = game.input.keyboard.createCursorKeys();
         key1 = game.input.keyboard.addKey(Phaser.Keyboard.Z);
         
+        //black bar
+        bar = game.add.group();
+        var b = bar.create(0, -20, 'bar');
+        b = bar.create(0, 370, 'bar');
+        bar.fixedToCamera = true;
+        
         //text
-        message = game.add.text(10, 375, 'move with arrow keys and collect with [ Z ]', { fontSize: '10px', fill: '#fff' });
+        message = game.add.text(10, 375, 'move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
         message.fontSize = 15;
         message.font = 'Arial Black';
         message.fixedToCamera = true;
@@ -193,61 +209,71 @@ window.onload = function () {
         mapText.font = 'Arial Black';
         mapText.fixedToCamera = true;        
 
-        hungerText = game.add.text(10, 30, 'hunger', { fontSize: '10px', fill: '#fff' });
+        hungerText = game.add.text(10, 30, 'Hunger: ' + hunger, { fontSize: '10px', fill: '#fff' });
         hungerText.fontSize = 15;
         hungerText.font = 'Arial Black';
         hungerText.fixedToCamera = true;    
 
-        attentionText = game.add.text(10, 50, 'attention', { fontSize: '10px', fill: '#fff' });
+        attentionText = game.add.text(10, 50, 'Attention span: ' + attention, { fontSize: '10px', fill: '#fff' });
         attentionText.fontSize = 15;
         attentionText.font = 'Arial Black';
         attentionText.fixedToCamera = true;         
     }
 
     function update() {
-        
-        game.physics.arcade.collide(p, layer);
-        game.physics.arcade.collide(p, ground, groundCollision, null, this);
-        game.physics.arcade.overlap(p, chests, itemCollision, null, this);
-        game.physics.arcade.overlap(p, treasures, treasureCollision, null, this);        
-        game.physics.arcade.collide(p, ground);
-        game.physics.arcade.collide(p, rocks);
-        enemies.forEach(checkPos, this);
-        game.physics.arcade.overlap(p, enemies, enemyCollision, null, this);
-        game.physics.arcade.overlap(p, foods, foodCollision, null, this);
-        game.physics.arcade.overlap(p, map, mapCollision, null, this);
-        
-        if(mapPieceCount == 4){
-            game.physics.arcade.overlap(p, endPrize, endCollision, null, this);
-        }
+            game.physics.arcade.collide(p, layer);
+            game.physics.arcade.collide(p, ground, groundCollision, null, this);
+            game.physics.arcade.overlap(p, chests, itemCollision, null, this);
+            game.physics.arcade.overlap(p, treasures, treasureCollision, null, this);        
+            game.physics.arcade.collide(p, ground);
+            game.physics.arcade.collide(p, rocks, rockCollision, null, this);
+            enemies.forEach(checkPos, this);
+            game.physics.arcade.overlap(p, enemies, enemyCollision, null, this);
+            game.physics.arcade.overlap(p, foods, foodCollision, null, this);
+            game.physics.arcade.overlap(p, map, mapCollision, null, this);
 
-        
-        p.body.velocity.x = 0;
-        p.body.velocity.y = 0;
-        if (cursors.left.isDown)
-        {
-            p.body.velocity.x = -200;
-        }
-        else if (cursors.right.isDown)
-        {
-            p.body.velocity.x = 200;
-        }
+            if(mapPieceCount == 4){
+                game.physics.arcade.overlap(p, endPrize, endCollision, null, this);
+            }
 
-        if (cursors.up.isDown)
-        {
-            p.body.velocity.y = -200;
-        }
-        else if (cursors.down.isDown)
-        {
-            p.body.velocity.y = 200;
-        }
+            p.body.velocity.x = 0;
+            p.body.velocity.y = 0;
+            
+            if (cursors.left.isDown)
+            {
+                p.body.velocity.x = -200;
+            }
+            else if (cursors.right.isDown)
+            {
+                p.body.velocity.x = 200;
+            }
+            else if (cursors.up.isDown )
+            {
+                p.body.velocity.y = -200;
+            }
+            else if (cursors.down.isDown)
+            {
+                p.body.velocity.y = 200;
+            }
         
-
+        time++;
+        if(time%100 == 0){
+            hunger = hunger - (1/2);
+            attention--;
+        }
+        checkStats();
+        //location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y) + ' time: ' + time;
         location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y);
+        updateStats();
+        
     }
+    
+    
     //kill dirt
     function groundCollision (o1, o2) {
         o2.kill();
+        attention = attention - (1/4);
+        hunger = hunger - (1/10);
     }
 
     //flying dirts
@@ -262,13 +288,24 @@ window.onload = function () {
     }
     */
     
+    function rockCollision(o1, o2){
+        hunger = hunger - (1/5);
+        attention = attention - (1/100);
+    }
+    
    function itemCollision (o1, o2) {
        if(key1.isDown){
-            addAni = game.add.sprite(o2.x-40, o2.y-25, 'chestAni');                
-            animate = addAni.animations.add('chestAction');
-            addAni.animations.play('chestAction', 50, false);        
-            o2.kill();     
-            message.text = 'get chest';
+           addAni = game.add.sprite(o2.x-40, o2.y-25, 'chestAni');                
+           animate = addAni.animations.add('chestAction');
+           addAni.animations.play('chestAction', 50, false);        
+           o2.kill();     
+           message.text = 'Opened a chest';
+           
+           attention = attention + 10;
+           if(attention > attentionMax){
+               attention = attentionMax;
+           }
+           score = score + 100;
        }
     }   
 
@@ -284,21 +321,34 @@ window.onload = function () {
         if (key1.isDown)
         {        
             o2.kill();     
-            message.text = 'get treasure';
+            message.text = 'Picked up treasure';
+           attention = attention + 5;
+           if(attention > attentionMax){
+               attention = attentionMax;
+           }
+            score = score + 10;
         }
     }
     
     function enemyCollision(p, e){
         //player gets more hungry
         //score affected
-        message.text = 'ouch';
+        message.text = 'OUCH!';
+        hunger = hunger - 100;
+        attention = attention - 100;
     }
     
     function foodCollision(p, f){
         if (key1.isDown)
         {
             f.kill();
-            message.text = 'eat food';
+            message.text = 'Ate food';
+            
+           hunger = hunger + 100;
+           if(hunger > hungerMax){
+               hunger = hungerMax;
+           }   
+            score = score + 5;
         }        
     }  
     
@@ -306,10 +356,14 @@ window.onload = function () {
         if (key1.isDown)
         {
             piece.kill();
-            message.text = 'found map piece';
+            message.text = 'Found map piece';
             mapPieceCount++;
             mapText.text = 'Map Pieces: ' + mapPieceCount + '/4';
-            
+           attention = attention + 100;
+           if(attention > attentionMax){
+               attention = attentionMax;
+           }
+            score = score + 200;
             if(mapPieceCount == 4){
                 mapText.text = 'X:' + endX + ' Y:' + endY;
                 endPrize.visible = true;
@@ -321,7 +375,25 @@ window.onload = function () {
         if (key1.isDown)
         {
             end.kill();
+            score = score + 10000000;
             message.text = 'END';
         }        
     }  
+    
+    function updateStats(){
+        hungerText.text = 'Hunger: ' + Math.floor(hunger);
+        attentionText.text = 'Attention span: ' + Math.floor(attention);
+    }
+    
+    function checkStats(){
+        if(hunger <= 0 || attention <= 0){
+            hunger = 0;
+            attention = 0
+            gameover == true;
+            message.text = 'GAMEOVER. SCORE = ' + score;
+            cursors = game.input.keyboard.disable = true;
+        }
+        
+    }
+
 };
