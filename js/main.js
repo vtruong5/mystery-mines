@@ -16,7 +16,8 @@ window.onload = function () {
     var game = new Phaser.Game(500 , 400, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
     
     
-    function preload() {
+    function preload() 
+    {
 
         game.load.tilemap('map', 'assets/test.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tile1', 'assets/tile1.png');
@@ -34,8 +35,16 @@ window.onload = function () {
         game.load.image('final', 'assets/end_treasure.png');
         game.load.image('bar', 'assets/bar.png');
         
+        
+        game.load.image('healthbar', 'assets/healthbar_bar.png');
+        game.load.image('healthbarBackground', 'assets/healthbar_background.png');
+        
     }
     
+    
+    var healthbar;
+    var healthbarBackground;
+    var healthbarWidth;
     var map;
     var tileset;
     var layer;
@@ -81,7 +90,9 @@ window.onload = function () {
     //var dirtCount = 0;
     var time = 0;
     
-    function create() {
+    
+    function create() 
+    {
         
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.stage.backgroundColor = '#000000';
@@ -128,8 +139,9 @@ window.onload = function () {
                     var t = treasures.create(32*i,j*32, 'treasure');
                 }
               }
-        }           
+        }         
         
+       
         //treasure chest
         chests = game.add.physicsGroup();
         for (var i = 0; i < 100; i++){
@@ -217,10 +229,21 @@ window.onload = function () {
         attentionText = game.add.text(10, 50, 'Attention span: ' + attention, { fontSize: '10px', fill: '#fff' });
         attentionText.fontSize = 15;
         attentionText.font = 'Arial Black';
-        attentionText.fixedToCamera = true;         
+        attentionText.fixedToCamera = true;    
+        
+        //Add healthbar background and bar
+        healthbarBackground = game.add.image(100,300,'healthbarBackground');
+        healthbarBackground.fixedToCamera = true;
+        
+        healthbar = game.add.image(healthbarBackground.x+5,healthbarBackground.y+5,'healthbar');
+        healthbar.fixedToCamera = true;
+        
+        healthbarWidth = healthbar.width;
+       
     }
 
-    function update() {
+    function update() 
+    {        
             game.physics.arcade.collide(p, layer);
             game.physics.arcade.collide(p, ground, groundCollision, null, this);
             game.physics.arcade.overlap(p, chests, itemCollision, null, this);
@@ -231,7 +254,7 @@ window.onload = function () {
             game.physics.arcade.overlap(p, enemies, enemyCollision, null, this);
             game.physics.arcade.overlap(p, foods, foodCollision, null, this);
             game.physics.arcade.overlap(p, map, mapCollision, null, this);
-
+          
             if(mapPieceCount == 4){
                 game.physics.arcade.overlap(p, endPrize, endCollision, null, this);
             }
@@ -265,12 +288,12 @@ window.onload = function () {
         //location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y) + ' time: ' + time;
         location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y);
         updateStats();
-        
     }
     
     
     //kill dirt
-    function groundCollision (o1, o2) {
+    function groundCollision (o1, o2) 
+    {
         o2.kill();
         attention = attention - (1/4);
         hunger = hunger - (1/10);
@@ -288,7 +311,8 @@ window.onload = function () {
     }
     */
     
-    function rockCollision(o1, o2){
+    function rockCollision(o1, o2)
+    {
         hunger = hunger - (1/5);
         attention = attention - (1/100);
     }
@@ -317,7 +341,8 @@ window.onload = function () {
 
     }    
     
-    function treasureCollision (o1, o2){
+    function treasureCollision (o1, o2)
+    {
         if (key1.isDown)
         {        
             o2.kill();     
@@ -330,7 +355,8 @@ window.onload = function () {
         }
     }
     
-    function enemyCollision(p, e){
+    function enemyCollision(p, e)
+    {
         //player gets more hungry
         //score affected
         message.text = 'OUCH!';
@@ -338,7 +364,8 @@ window.onload = function () {
         attention = attention - 100;
     }
     
-    function foodCollision(p, f){
+    function foodCollision(p, f)
+    {
         if (key1.isDown)
         {
             f.kill();
@@ -352,7 +379,8 @@ window.onload = function () {
         }        
     }  
     
-    function mapCollision(p, piece){
+    function mapCollision(p, piece)
+    {
         if (key1.isDown)
         {
             piece.kill();
@@ -371,7 +399,8 @@ window.onload = function () {
         }        
     }    
     
-    function endCollision(p, end){
+    function endCollision(p, end)
+    {
         if (key1.isDown)
         {
             end.kill();
@@ -380,12 +409,15 @@ window.onload = function () {
         }        
     }  
     
-    function updateStats(){
+    function updateStats()
+    {
         hungerText.text = 'Hunger: ' + Math.floor(hunger);
         attentionText.text = 'Attention span: ' + Math.floor(attention);
+        healthbar.crop(new Phaser.Rectangle(0, 0, (healthbarWidth * hunger)/hungerMax, healthbar.height));
     }
     
-    function checkStats(){
+    function checkStats()
+    {
         if(hunger <= 0 || attention <= 0){
             hunger = 0;
             attention = 0
