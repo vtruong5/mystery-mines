@@ -41,16 +41,22 @@ window.onload = function () {
         game.load.spritesheet('chestAni', 'assets/Heal6.png', 100, 100, 30);
         game.load.spritesheet('attack1', 'assets/Attack1.png', 110, 110, 4);
         game.load.spritesheet('fire', 'assets/fire.png', 110, 110, 28);
-        //bar
+        //bars
         game.load.image('healthbar', 'assets/healthbar_bar.png');
         game.load.image('healthbarBackground', 'assets/healthbar_background.png');
-        
+        game.load.image('attentionbar', 'assets/healthbar_bar2.png');
     }
     
     
     var healthbar;
     var healthbarBackground;
     var healthbarWidth;
+    
+    var attentionbar;
+    var attentionbarBackground;
+    var attentionbarWidth;
+    
+    
     var map;
     var tileset;
     var layer;
@@ -259,13 +265,18 @@ window.onload = function () {
         
         //Add healthbar background and bar
         healthbarBackground = game.add.image(10,50,'healthbarBackground');
-        healthbarBackground.fixedToCamera = true;
-        
+        healthbarBackground.fixedToCamera = true;     
         healthbar = game.add.image(healthbarBackground.x+5,healthbarBackground.y+5,'healthbar');
         healthbar.fixedToCamera = true;
-        
         healthbarWidth = healthbar.width;
-
+        
+        //Add attentionbar background and bar
+        attentionbarBackground = game.add.image(10,120,'healthbarBackground');
+        attentionbarBackground.fixedToCamera = true;     
+        attentionbar = game.add.image(attentionbarBackground.x+5,attentionbarBackground.y+5,'attentionbar');
+        attentionbar.fixedToCamera = true;
+        attentionbarWidth = attentionbar.width;
+        
         //hunger bar
         hungerText = game.add.text(20, 58, 'HUNGER ' + hunger, { fontSize: '10px', fill: '#fff' });
         hungerText.fontSize = 10;
@@ -460,6 +471,7 @@ window.onload = function () {
         hungerText.text = 'HUNGER ' + Math.floor(hunger);
         attentionText.text = 'Attention span: ' + Math.floor(attention);
         healthbar.crop(new Phaser.Rectangle(0, 0, (healthbarWidth * hunger)/hungerMax, healthbar.height));
+        attentionbar.crop(new Phaser.Rectangle(0, 0, (attentionbarWidth * attention)/attentionMax, attentionbar.height));
     }
     
     function checkStats()
