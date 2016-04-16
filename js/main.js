@@ -13,29 +13,35 @@ window.onload = function () {
     
     "use strict";
     
-    var game = new Phaser.Game(500 , 400, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
+    var game = new Phaser.Game(500 , 500, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
     
     
     function preload() 
     {
-
+        //characters
+        //game.load.spritesheet('player', 'assets/player.png', 32, 32); 
+        game.load.spritesheet('player', 'assets/player_small.png', 25, 25);
+        //map
         game.load.tilemap('map', 'assets/test.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tile1', 'assets/tile1.png');
         game.load.image('tile2', 'assets/tile2.png');
-        game.load.image('player', 'assets/miner_small.png');
+        //enemy
+        game.load.spritesheet('bat', 'assets/enemy_sheet.png', 32, 32, 3);        
+        //objects
         game.load.image('rock', 'assets/bigrock.png');
         game.load.image('dirt', 'assets/dirt.png');
         game.load.image('chest', 'assets/collect.png');
-        game.load.spritesheet('chestAni', 'assets/Heal6.png', 100, 100, 30);
-        //game.load.spritesheet('treasure', 'assets/gems.png', 32, 32, 5);
         game.load.image('treasure', 'assets/gem.png');
-        game.load.image('bat', 'assets/enemy.png');
         game.load.image('food', 'assets/food.png');
+        game.load.image('bomb', 'assets/bomb.png');
         game.load.image('map', 'assets/map_piece.png');
         game.load.image('final', 'assets/end_treasure.png');
         game.load.image('bar', 'assets/bar.png');
-        
-        
+        //animation
+        game.load.spritesheet('chestAni', 'assets/Heal6.png', 100, 100, 30);
+        game.load.spritesheet('attack1', 'assets/Attack1.png', 110, 110, 4);
+        game.load.spritesheet('fire', 'assets/fire.png', 110, 110, 28);
+        //bar
         game.load.image('healthbar', 'assets/healthbar_bar.png');
         game.load.image('healthbarBackground', 'assets/healthbar_background.png');
         
@@ -66,6 +72,7 @@ window.onload = function () {
     var treasures;
     var enemies;
     var foods;
+    var bombs;
     var map;
     var endPrize;
     var endX = game.rnd.between(0, 99)*32;
@@ -73,6 +80,7 @@ window.onload = function () {
     //var endX = 1650;
     //var endY = 1650;
     var bar;
+    
     
     //animations
     var addAni;
@@ -89,6 +97,9 @@ window.onload = function () {
     var gameover = false;
     //var dirtCount = 0;
     var time = 0;
+    
+    var bombTime = 0;
+    var oldBombTime = 0;    
     
     
     function create() 
@@ -164,17 +175,29 @@ window.onload = function () {
                 }
               }
         }        
-         
+        
+        //make bombs
+        bombs = game.add.physicsGroup();
+        for (var i = 0; i < 100; i++){
+            for (var j = 0; j < 100; j++){
+                var rnd = game.rnd.between(0, 100);
+                if(rnd > 95){
+                    var b = bombs.create(32*i,j*32, 'bomb');
+                    b.body.mass = -80;                   
+                }
+
+            }
+        }         
+        
         //make rock   
         rocks = game.add.physicsGroup();
         for (var i = 0; i < 100; i++){
             for (var j = 0; j < 100; j++){
-                var rnd = game.rnd.between(0, 100)
+                var rnd = game.rnd.between(0, 100);
                 if(rnd > 70){
                     var r = rocks.create(32*i,j*32, 'rock');
                     r.body.mass = -100;                   
                 }
-
             }
         } 
         
@@ -184,13 +207,19 @@ window.onload = function () {
         for(var i = 0; i < 5; i++){
             var e = enemies.create(game.world.randomX, y, 'bat');
             e.body.velocity.x = game.rnd.between(200, 400);
+            var move = e.animations.add('fly');
+            e.animations.play('fly',10, true);            
             y += 128;
         }
-        
+    
         //make player
         p = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
         game.physics.enable(p);     
         p.body.collideWorldBounds = true;
+        p.animations.add('right', [3, 4, 5], 10, true);
+        p.animations.add('up', [9, 10, 11], 10, true);
+        p.animations.add('down', [0, 1, 2], 10, true);
+        p.animations.add('left', [6, 7, 8], 10, true);         
         
         //game camera
         game.camera.follow(p);     
@@ -201,12 +230,12 @@ window.onload = function () {
         
         //black bar
         bar = game.add.group();
-        var b = bar.create(0, -20, 'bar');
-        b = bar.create(0, 370, 'bar');
+        var b = bar.create(0, -60, 'bar');
+        b = bar.create(0, 460, 'bar');
         bar.fixedToCamera = true;
         
         //text
-        message = game.add.text(10, 375, 'move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
+        message = game.add.text(10, 470, 'move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
         message.fontSize = 15;
         message.font = 'Arial Black';
         message.fixedToCamera = true;
@@ -221,25 +250,27 @@ window.onload = function () {
         mapText.font = 'Arial Black';
         mapText.fixedToCamera = true;        
 
-        hungerText = game.add.text(10, 30, 'Hunger: ' + hunger, { fontSize: '10px', fill: '#fff' });
-        hungerText.fontSize = 15;
-        hungerText.font = 'Arial Black';
-        hungerText.fixedToCamera = true;    
+  
 
-        attentionText = game.add.text(10, 50, 'Attention span: ' + attention, { fontSize: '10px', fill: '#fff' });
+        attentionText = game.add.text(10, 90, 'Attention span: ' + attention, { fontSize: '10px', fill: '#fff' });
         attentionText.fontSize = 15;
         attentionText.font = 'Arial Black';
         attentionText.fixedToCamera = true;    
         
         //Add healthbar background and bar
-        healthbarBackground = game.add.image(100,300,'healthbarBackground');
+        healthbarBackground = game.add.image(10,50,'healthbarBackground');
         healthbarBackground.fixedToCamera = true;
         
         healthbar = game.add.image(healthbarBackground.x+5,healthbarBackground.y+5,'healthbar');
         healthbar.fixedToCamera = true;
         
         healthbarWidth = healthbar.width;
-       
+
+        //hunger bar
+        hungerText = game.add.text(20, 58, 'HUNGER ' + hunger, { fontSize: '10px', fill: '#fff' });
+        hungerText.fontSize = 10;
+        hungerText.font = 'Arial';
+        hungerText.fixedToCamera = true;          
     }
 
     function update() 
@@ -250,6 +281,7 @@ window.onload = function () {
             game.physics.arcade.overlap(p, treasures, treasureCollision, null, this);        
             game.physics.arcade.collide(p, ground);
             game.physics.arcade.collide(p, rocks, rockCollision, null, this);
+            game.physics.arcade.collide(p, bombs, bombCollision, null, this);
             enemies.forEach(checkPos, this);
             game.physics.arcade.overlap(p, enemies, enemyCollision, null, this);
             game.physics.arcade.overlap(p, foods, foodCollision, null, this);
@@ -262,22 +294,27 @@ window.onload = function () {
             p.body.velocity.x = 0;
             p.body.velocity.y = 0;
             
-            if (cursors.left.isDown)
-            {
-                p.body.velocity.x = -200;
-            }
-            else if (cursors.right.isDown)
-            {
-                p.body.velocity.x = 200;
-            }
-            else if (cursors.up.isDown )
-            {
-                p.body.velocity.y = -200;
-            }
-            else if (cursors.down.isDown)
-            {
-                p.body.velocity.y = 200;
-            }
+        if (cursors.left.isDown){
+            p.body.velocity.x = -200;
+            p.animations.play('left');
+        }
+        else if (cursors.right.isDown){
+            p.body.velocity.x = 200;
+            p.animations.play('right');
+        }
+        else if (cursors.up.isDown){
+            p.body.velocity.y = -200;
+            p.animations.play('up');
+        }
+        else if (cursors.down.isDown){
+            p.body.velocity.y = 200;
+            p.animations.play('down');
+        }
+        else{
+            //  Stand still
+            p.animations.stop();
+            //p.frame = 2;
+        } 
         
         time++;
         if(time%100 == 0){
@@ -299,23 +336,29 @@ window.onload = function () {
         hunger = hunger - (1/10);
     }
 
-    //flying dirts
-    /*
-    function checkPos (dirt) {
-        if (dirt.x > 3200 || dirt.x < 0 || dirt.y > 3200 || dirt.y < 0)
-        {
-            dirt.kill();
-            message.text = 'dirt kill';
-        }
-
-    }
-    */
     
     function rockCollision(o1, o2)
     {
         hunger = hunger - (1/5);
         attention = attention - (1/100);
     }
+    
+    function bombCollision(o1, o2)
+    {
+        hunger = hunger - (1/5);
+        attention = attention - (1/100);
+        bombTime = bombTime + 1;
+        if(bombTime == 20){
+            //animate
+            addAni = game.add.sprite(o2.x-20, o2.y-50, 'fire');                
+            animate = addAni.animations.add('fireAction');     
+            addAni.animations.play('fireAction', 40, false);            
+            o2.kill();
+            bombTime = 0; 
+            hunger = hunger - 100;
+            message.text = 'Bomb Exploded!';         
+        }            
+    }    
     
    function itemCollision (o1, o2) {
        if(key1.isDown){
@@ -360,8 +403,11 @@ window.onload = function () {
         //player gets more hungry
         //score affected
         message.text = 'OUCH!';
-        hunger = hunger - 100;
-        attention = attention - 100;
+        hunger = hunger - 50;
+        attention = attention - 50;
+        addAni = game.add.sprite(e.x-20, e.y-50, 'attack1');                
+        animate = addAni.animations.add('enemyAtk');     
+        addAni.animations.play('enemyAtk', 30, false);          
     }
     
     function foodCollision(p, f)
@@ -411,7 +457,7 @@ window.onload = function () {
     
     function updateStats()
     {
-        hungerText.text = 'Hunger: ' + Math.floor(hunger);
+        hungerText.text = 'HUNGER ' + Math.floor(hunger);
         attentionText.text = 'Attention span: ' + Math.floor(attention);
         healthbar.crop(new Phaser.Rectangle(0, 0, (healthbarWidth * hunger)/hungerMax, healthbar.height));
     }
