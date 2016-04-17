@@ -45,17 +45,21 @@ window.onload = function () {
         game.load.image('healthbar', 'assets/healthbar_bar.png');
         game.load.image('healthbarBackground', 'assets/healthbar_background.png');
         game.load.image('attentionbar', 'assets/healthbar_bar2.png');
+        
+        game.load.image('pause_button', 'assets/pause_button.png');
+        game.load.image('pauseScreen', 'assets/pause_screen.png');
     }
     
     
     var healthbar;
     var healthbarBackground;
     var healthbarWidth;
+    var pauseScreen;
     
     var attentionbar;
     var attentionbarBackground;
-    var attentionbarWidth;
-    
+    var attentionbarWidth;    
+    var pauseButton;
     
     var map;
     var tileset;
@@ -281,9 +285,39 @@ window.onload = function () {
         hungerText = game.add.text(20, 58, 'HUNGER ' + hunger, { fontSize: '10px', fill: '#fff' });
         hungerText.fontSize = 10;
         hungerText.font = 'Arial';
-        hungerText.fixedToCamera = true;          
+        hungerText.fixedToCamera = true;    
+        
+        //Add pause button
+        
+        pauseButton = this.game.add.sprite(400, 400, 'pause_button');
+        pauseButton.scale.setTo(0.05, 0.05);
+        pauseButton.fixedToCamera = true;
+        pauseButton.inputEnabled = true;
+        pauseButton.events.onInputUp.add(pause,this);
+        this.game.input.onDown.add(unpause,this);
+        
+        
+         //Add pause screen
+        pauseScreen = game.add.image(250,250,'pauseScreen');
+        pauseScreen.fixedToCamera = true;
+        pauseScreen.anchor.setTo(0.5, 0.5);
+        pauseScreen.visible = false;
     }
-
+    
+    function pause()
+    {
+        pauseScreen.visible = true;
+        game.paused = true;
+    }
+    function unpause()
+    {
+       if(this.game.paused)    
+       {
+           pauseScreen.visible = false;
+           this.game.paused = false;
+       }
+    } 
+    
     function update() 
     {        
             game.physics.arcade.collide(p, layer);
