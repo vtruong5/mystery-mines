@@ -48,6 +48,8 @@ window.onload = function () {
         
         game.load.image('pause_button', 'assets/pause_button.png');
         game.load.image('pauseScreen', 'assets/pause_screen.png');
+        //start menu
+        game.load.image('menu', 'assets/menu.png');
     }
     
     
@@ -111,12 +113,16 @@ window.onload = function () {
     var bombTime = 0;
     var oldBombTime = 0;    
     
+    //start menu
+    var menu;
+    
     
     function create() 
     {
         
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.stage.backgroundColor = '#000000';
+        
         
         //make world
         map = game.add.tilemap('map');
@@ -302,7 +308,20 @@ window.onload = function () {
         pauseScreen.fixedToCamera = true;
         pauseScreen.anchor.setTo(0.5, 0.5);
         pauseScreen.visible = false;
+        
+        //Add menu
+        menu = game.add.image(0,0,'menu');
+        game.paused = true;
+        game.input.onTap.addOnce(restart,this);
     }
+    
+    
+     function restart()
+    {
+        menu.visible = false;
+        game.paused = false;
+    }
+    
     
     function pause()
     {
