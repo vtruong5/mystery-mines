@@ -51,6 +51,7 @@ window.onload = function () {
         game.load.image('pauseScreen', 'assets/pause_screen.png');
         game.load.image('gameoverScreen', 'assets/gameover_screen.png');
         game.load.image('restartButton', 'assets/restart_button.png');
+        game.load.image('winScreen', 'assets/win_screen.png');
         //start menu
         game.load.image('menu', 'assets/menu.png');
     }
@@ -167,8 +168,10 @@ window.onload = function () {
         for (var i = 0; i < 100; i++){
             for (var j = 0; j < 100; j++){
                 var rnd = game.rnd.between(0, 100)
-                if(rnd < 10){                
-                    var t = treasures.create(32*i,j*32, 'treasure');
+                if(rnd < 10){       
+                    if(!(i == 50 && j == 50)){
+                        var t = treasures.create(32*i,j*32, 'treasure');
+                    }  
                 }
               }
         }         
@@ -179,8 +182,10 @@ window.onload = function () {
         for (var i = 0; i < 100; i++){
             for (var j = 0; j < 100; j++){
                 var rnd = game.rnd.between(0, 100)
-                if(rnd == 5){                
-                    var c = chests.create(32*i,j*32, 'chest');
+                if(rnd == 5){     
+                    if(!(i == 50 && j == 50)){
+                        var c = chests.create(32*i,j*32, 'chest');
+                    }
                 }
               }
         }  
@@ -190,9 +195,11 @@ window.onload = function () {
         for (var i = 0; i < 100; i++){
             for (var j = 0; j < 100; j++){
                 var rnd = game.rnd.between(0, 100)
-                if(rnd > 10){                
-                    var d = ground.create(32*i,j*32, 'dirt');
-                    game.physics.arcade.enable(d);
+                if(rnd > 10){    
+                    if(!(i == 50 && j == 50)){
+                        var d = ground.create(32*i,j*32, 'dirt');
+                        game.physics.arcade.enable(d);                        
+                    }
                 }
               }
         }        
@@ -203,8 +210,10 @@ window.onload = function () {
             for (var j = 0; j < 100; j++){
                 var rnd = game.rnd.between(0, 100);
                 if(rnd > 95){
-                    var b = bombs.create(32*i,j*32, 'bomb');
-                    b.body.mass = -80;                   
+                    if(!(i == 50 && j == 50)){
+                        var b = bombs.create(32*i,j*32, 'bomb');
+                        b.body.mass = -80;                                
+                    }
                 }
 
             }
@@ -216,8 +225,10 @@ window.onload = function () {
             for (var j = 0; j < 100; j++){
                 var rnd = game.rnd.between(0, 100);
                 if(rnd > 70){
-                    var r = rocks.create(32*i,j*32, 'rock');
-                    r.body.mass = -100;                   
+                    if(!(i == 50 && j == 50)){
+                        var r = rocks.create(32*i,j*32, 'rock');
+                        r.body.mass = -100;                            
+                    }            
                 }
             }
         } 
@@ -270,13 +281,6 @@ window.onload = function () {
         mapText.fontSize = 15;
         mapText.font = 'Arial Black';
         mapText.fixedToCamera = true;        
-
-  
-
-        attentionText = game.add.text(10, 90, 'Attention span: ' + attention, { fontSize: '10px', fill: '#fff' });
-        attentionText.fontSize = 15;
-        attentionText.font = 'Arial Black';
-        attentionText.fixedToCamera = true;    
         
         //Add healthbar background and bar
         healthbarBackground = game.add.image(10,50,'healthbarBackground');
@@ -286,21 +290,25 @@ window.onload = function () {
         healthbarWidth = healthbar.width;
         
         //Add attentionbar background and bar
-        attentionbarBackground = game.add.image(10,120,'healthbarBackground');
+        attentionbarBackground = game.add.image(10,90,'healthbarBackground');
         attentionbarBackground.fixedToCamera = true;     
         attentionbar = game.add.image(attentionbarBackground.x+5,attentionbarBackground.y+5,'attentionbar');
         attentionbar.fixedToCamera = true;
         attentionbarWidth = attentionbar.width;
         
-        //hunger bar
-        hungerText = game.add.text(20, 58, 'HUNGER ' + hunger, { fontSize: '10px', fill: '#fff' });
+        //hunger bar and attention bar text
+        hungerText = game.add.text(20, 58, 'HUNGER ' + hunger + ' / ' + hungerMax, { fontSize: '10px', fill: '#fff' });
         hungerText.fontSize = 10;
         hungerText.font = 'Arial';
         hungerText.fixedToCamera = true;    
+        attentionText = game.add.text(20, 98, 'ATTENTION SPAN ' + attention + ' / ' + attentionMax, { fontSize: '10px', fill: '#fff' });
+        attentionText.fontSize = 10;
+        attentionText.font = 'Arial';
+        attentionText.fixedToCamera = true;            
         
         //Add pause button
         
-        pauseButton = this.game.add.image(400, 400, 'pause_button');
+        pauseButton = this.game.add.image(450, 450, 'pause_button');
         pauseButton.scale.setTo(0.05, 0.05);
         pauseButton.fixedToCamera = true;
         pauseButton.inputEnabled = true;
@@ -381,6 +389,26 @@ window.onload = function () {
         gameover = false;
         game.state.restart();
     }
+    
+    function gameWin(){
+        message.text = 'WIN. SCORE = ' + score;
+        
+        p.animations.stop();
+        p.body.velocity.setTo(0, 0);   
+
+        gameoverScreen = game.add.image(250,250,'winScreen');
+        gameoverScreen.fixedToCamera = true;
+        gameoverScreen.anchor.setTo(0.5, 0.5);           
+        
+        restartButton = game.add.image(250, 290, 'restartButton');
+        restartButton.scale.setTo(0.5, 0.5);
+        restartButton.fixedToCamera = true;
+        restartButton.anchor.setTo(0.5, 0.5);     
+        restartButton.inputEnabled = true;
+        pauseButton.inputEnabled = false;      
+        gameover = true;           
+    }
+    
     function update() 
     {        
         if(!gameover)
@@ -524,7 +552,8 @@ window.onload = function () {
         attention = attention - 50;
         addAni = game.add.sprite(e.x-20, e.y-50, 'attack1');                
         animate = addAni.animations.add('enemyAtk');     
-        addAni.animations.play('enemyAtk', 30, false);          
+        addAni.animations.play('enemyAtk', 30, false); 
+        
     }
     
     function foodCollision(p, f)
@@ -569,13 +598,14 @@ window.onload = function () {
             end.kill();
             score = score + 10000000;
             message.text = 'END';
+            gameWin();
         }        
     }  
     
     function updateStats()
     {
-        hungerText.text = 'HUNGER ' + Math.floor(hunger);
-        attentionText.text = 'Attention span: ' + Math.floor(attention);
+        hungerText.text = 'HUNGER ' + Math.floor(hunger) + ' / ' +hungerMax;
+        attentionText.text = 'ATTENTION SPAN ' + Math.floor(attention) + ' / ' +attentionMax;
         healthbar.crop(new Phaser.Rectangle(0, 0, (healthbarWidth * hunger)/hungerMax, healthbar.height));
         attentionbar.crop(new Phaser.Rectangle(0, 0, (attentionbarWidth * attention)/attentionMax, attentionbar.height));
     }
