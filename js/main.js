@@ -46,8 +46,11 @@ window.onload = function () {
         game.load.image('healthbarBackground', 'assets/healthbar_background.png');
         game.load.image('attentionbar', 'assets/healthbar_bar2.png');
         
+        //Pause and game over screens
         game.load.image('pause_button', 'assets/pause_button.png');
         game.load.image('pauseScreen', 'assets/pause_screen.png');
+        game.load.image('gameoverScreen', 'assets/gameover_screen.png');
+        game.load.image('restartButton', 'assets/restart_button.png');
         //start menu
         game.load.image('menu', 'assets/menu.png');
     }
@@ -57,6 +60,8 @@ window.onload = function () {
     var healthbarBackground;
     var healthbarWidth;
     var pauseScreen;
+    var gameoverScreen;
+    var restartButton;
     
     var attentionbar;
     var attentionbarBackground;
@@ -295,7 +300,7 @@ window.onload = function () {
         
         //Add pause button
         
-        pauseButton = this.game.add.sprite(400, 400, 'pause_button');
+        pauseButton = this.game.add.image(400, 400, 'pause_button');
         pauseButton.scale.setTo(0.05, 0.05);
         pauseButton.fixedToCamera = true;
         pauseButton.inputEnabled = true;
@@ -312,7 +317,7 @@ window.onload = function () {
         //Add menu
         menu = game.add.image(0,0,'menu');
         game.paused = true;
-        game.input.onTap.addOnce(restart,this);
+        this.game.input.onDown.add(restart,this);
     }
     
     
@@ -325,9 +330,11 @@ window.onload = function () {
     
     function pause()
     {
+       
         pauseScreen.visible = true;
         game.paused = true;
     }
+    
     function unpause()
     {
        if(this.game.paused)    
@@ -337,8 +344,47 @@ window.onload = function () {
        }
     } 
     
+    function gameOver()
+    {
+        attention = 0;
+        hunger = 0;
+        message.text = 'GAMEOVER. SCORE = ' + score;
+        
+        p.animations.stop();
+        p.body.velocity.setTo(0, 0);
+       
+        
+        gameoverScreen = game.add.image(250,250,'gameoverScreen');
+        gameoverScreen.fixedToCamera = true;
+        gameoverScreen.anchor.setTo(0.5, 0.5);     
+        
+        restartButton = game.add.image(250, 290, 'restartButton');
+        restartButton.scale.setTo(0.5, 0.5);
+        restartButton.fixedToCamera = true;
+        restartButton.anchor.setTo(0.5, 0.5);     
+        restartButton.inputEnabled = true;
+        pauseButton.inputEnabled = false;      
+        gameover = true;   
+     
+    }
+    
+    function restartGame()
+    {
+        attention = 3000;
+        hunger = 3000;
+        gameover = false;
+        score = 0;
+        time = 0; 
+        bombTime = 0;   
+        oldBombTime = 0;     
+        mapPieceCount = 0;
+        gameover = false;
+        game.state.restart();
+    }
     function update() 
     {        
+        if(!gameover)
+        {
             game.physics.arcade.collide(p, layer);
             game.physics.arcade.collide(p, ground, groundCollision, null, this);
             game.physics.arcade.overlap(p, chests, itemCollision, null, this);
@@ -358,37 +404,44 @@ window.onload = function () {
             p.body.velocity.x = 0;
             p.body.velocity.y = 0;
             
-        if (cursors.left.isDown){
-            p.body.velocity.x = -200;
-            p.animations.play('left');
+            if (cursors.left.isDown){
+                p.body.velocity.x = -200;
+                p.animations.play('left');
+            }
+            else if (cursors.right.isDown){
+                p.body.velocity.x = 200;
+                p.animations.play('right');
+            }
+            else if (cursors.up.isDown){
+                p.body.velocity.y = -200;
+                p.animations.play('up');
+            }
+            else if (cursors.down.isDown){
+                p.body.velocity.y = 200;
+                p.animations.play('down');
+            }
+            else{
+                //  Stand still
+                p.animations.stop();
+                //p.frame = 2;
+            } 
+
+            time++;
+            if(time%100 == 0){
+                hunger = hunger - (1/2);
+                attention--;
+            }
+
+            checkStats();
+
+            //location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y) + ' time: ' + time;
+            location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y);
+            updateStats();
         }
-        else if (cursors.right.isDown){
-            p.body.velocity.x = 200;
-            p.animations.play('right');
+        else
+        {
+            restartButton.events.onInputUp.add(restartGame,this);
         }
-        else if (cursors.up.isDown){
-            p.body.velocity.y = -200;
-            p.animations.play('up');
-        }
-        else if (cursors.down.isDown){
-            p.body.velocity.y = 200;
-            p.animations.play('down');
-        }
-        else{
-            //  Stand still
-            p.animations.stop();
-            //p.frame = 2;
-        } 
-        
-        time++;
-        if(time%100 == 0){
-            hunger = hunger - (1/2);
-            attention--;
-        }
-        checkStats();
-        //location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y) + ' time: ' + time;
-        location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y);
-        updateStats();
     }
     
     
@@ -529,12 +582,9 @@ window.onload = function () {
     
     function checkStats()
     {
-        if(hunger <= 0 || attention <= 0){
-            hunger = 0;
-            attention = 0
-            gameover == true;
-            message.text = 'GAMEOVER. SCORE = ' + score;
-            cursors = game.input.keyboard.disable = true;
+        if(hunger <= 0 || attention <= 0)
+        {
+            gameOver();
         }
         
     }
