@@ -424,7 +424,6 @@ window.onload = function () {
             game.physics.arcade.overlap(p, enemies, enemyCollision, null, this);
             game.physics.arcade.overlap(p, foods, foodCollision, null, this);
             game.physics.arcade.overlap(p, map, mapCollision, null, this);
-          
             if(mapPieceCount == 4){
                 game.physics.arcade.overlap(p, endPrize, endCollision, null, this);
             }
@@ -495,7 +494,7 @@ window.onload = function () {
         bombTime = bombTime + 1;
         if(bombTime == 20){
             //animate
-            addAni = game.add.sprite(o2.x-20, o2.y-50, 'fire');                
+            addAni = game.add.sprite(o2.x-20, o2.y-50, 'fire');   
             animate = addAni.animations.add('fireAction');     
             addAni.animations.play('fireAction', 40, false);            
             o2.kill();
@@ -550,10 +549,11 @@ window.onload = function () {
         message.text = 'OUCH!';
         hunger = hunger - 50;
         attention = attention - 50;
-        addAni = game.add.sprite(e.x-20, e.y-50, 'attack1');                
-        animate = addAni.animations.add('enemyAtk');     
-        addAni.animations.play('enemyAtk', 30, false); 
-        
+        addAni = game.add.sprite(p.x, p.y, 'attack1'); 
+        addAni.anchor.setTo(0.5, 0.5);
+        animate = addAni.animations.add('enemyAtk');  
+        animate.killOnComplete = true;
+        addAni.animations.play('enemyAtk', 30, false);        
     }
     
     function foodCollision(p, f)
