@@ -107,10 +107,12 @@ window.onload = function () {
     //in game stats
     var mapPieceCount = 0;
     var hunger = 3000;
-    var hungerMax = 5000;
+    var hungerMax = 3000;
     var attention = 3000;
-    var attentionMax = 5000;
+    var attentionMax = 3000;
+    var attentionMax = 3000;
     var score = 0;
+    var speed = 200;
     
     var gameover = false;
     //var dirtCount = 0;
@@ -158,7 +160,7 @@ window.onload = function () {
         
         //add food
         foods = game.add.physicsGroup();
-        for(var i = 0; i < 5; i++){
+        for(var i = 0; i < 9; i++){
             var f = foods.create(game.rnd.between(0, 99)*32,game.rnd.between(0, 99)*32, 'food');
         }        
         var f = foods.create(1700,1700, 'food');
@@ -297,11 +299,11 @@ window.onload = function () {
         attentionbarWidth = attentionbar.width;
         
         //hunger bar and attention bar text
-        hungerText = game.add.text(20, 58, 'HUNGER ' + hunger + ' / ' + hungerMax, { fontSize: '10px', fill: '#fff' });
+        hungerText = game.add.text(20, 58, 'HUNGER ', { fontSize: '10px', fill: '#fff' });
         hungerText.fontSize = 10;
         hungerText.font = 'Arial';
         hungerText.fixedToCamera = true;    
-        attentionText = game.add.text(20, 98, 'ATTENTION SPAN ' + attention + ' / ' + attentionMax, { fontSize: '10px', fill: '#fff' });
+        attentionText = game.add.text(20, 98, 'ATTENTION SPAN ', { fontSize: '10px', fill: '#fff' });
         attentionText.fontSize = 10;
         attentionText.font = 'Arial';
         attentionText.fixedToCamera = true;            
@@ -432,19 +434,19 @@ window.onload = function () {
             p.body.velocity.y = 0;
             
             if (cursors.left.isDown){
-                p.body.velocity.x = -200;
+                p.body.velocity.x = -(speed);
                 p.animations.play('left');
             }
             else if (cursors.right.isDown){
-                p.body.velocity.x = 200;
+                p.body.velocity.x = speed;
                 p.animations.play('right');
             }
             else if (cursors.up.isDown){
-                p.body.velocity.y = -200;
+                p.body.velocity.y = -(speed);
                 p.animations.play('up');
             }
             else if (cursors.down.isDown){
-                p.body.velocity.y = 200;
+                p.body.velocity.y = speed;
                 p.animations.play('down');
             }
             else{
@@ -476,8 +478,8 @@ window.onload = function () {
     function groundCollision (o1, o2) 
     {
         o2.kill();
-        attention = attention - (1/4);
-        hunger = hunger - (1/10);
+        attention = attention - (1/2);
+        hunger = hunger - (1);
     }
 
     
@@ -499,8 +501,8 @@ window.onload = function () {
             addAni.animations.play('fireAction', 40, false);            
             o2.kill();
             bombTime = 0; 
-            hunger = hunger - 100;
-            message.text = 'Bomb Exploded!';         
+            hunger = hunger - 150;
+            message.text = 'Oops!';         
         }            
     }    
     
@@ -510,9 +512,45 @@ window.onload = function () {
            animate = addAni.animations.add('chestAction');
            addAni.animations.play('chestAction', 50, false);        
            o2.kill();     
-           message.text = 'Opened a chest';
-           
-           attention = attention + 10;
+           var rnd = game.rnd.between(0, 100);
+           var effect = 10;
+           if(rnd > 90){
+               //speed up
+               speed = speed+100;
+               message.text = 'Opened a chest. Found speed potion. Speed + 100';
+           }
+           else if(rnd > 80){
+               //speed down
+               speed = speed - 50;
+               message.text = 'Opened a chest. Injured by spider. Speed - 100';
+           }
+           else if(rnd > 50){
+               //attention up
+               effect = 100;
+               if(rnd > 60){
+                message.text = 'Opened a chest. Found green gems.';
+               }
+               else if(rnd > 70){
+                message.text = 'Opened a chest. Found yellow gems.';
+               }
+               else{
+                message.text = 'Opened a chest. Found purple gems.';
+                }
+           }
+           else if(rnd > 10){
+               //attention down
+               effect = -100;
+                message.text = 'Opened a chest. Found nothing.';
+           }
+           else{
+               //food up
+                message.text = 'Opened a chest. Found potatoes.';
+                hunger = hunger + 100;
+               if(hunger > hungerMax){
+                   hunger = hungerMax;
+               }              
+           }
+           attention = attention + effect;
            if(attention > attentionMax){
                attention = attentionMax;
            }
@@ -533,12 +571,12 @@ window.onload = function () {
         if (key1.isDown)
         {        
             o2.kill();     
-            message.text = 'Picked up treasure';
+            message.text = 'Yay! Treasure!';
            attention = attention + 5;
            if(attention > attentionMax){
                attention = attentionMax;
            }
-            score = score + 10;
+            score = score + 100;
         }
     }
     
@@ -561,7 +599,7 @@ window.onload = function () {
         if (key1.isDown)
         {
             f.kill();
-            message.text = 'Ate food';
+            message.text = 'Yummy!';
             
            hunger = hunger + 100;
            if(hunger > hungerMax){
@@ -576,7 +614,7 @@ window.onload = function () {
         if (key1.isDown)
         {
             piece.kill();
-            message.text = 'Found map piece';
+            message.text = 'Found map piece.';
             mapPieceCount++;
             mapText.text = 'Map Pieces: ' + mapPieceCount + '/4';
            attention = attention + 100;
@@ -604,8 +642,8 @@ window.onload = function () {
     
     function updateStats()
     {
-        hungerText.text = 'HUNGER ' + Math.floor(hunger) + ' / ' +hungerMax;
-        attentionText.text = 'ATTENTION SPAN ' + Math.floor(attention) + ' / ' +attentionMax;
+        hungerText.text = 'HUNGER ' ;
+        attentionText.text = 'ATTENTION SPAN ';
         healthbar.crop(new Phaser.Rectangle(0, 0, (healthbarWidth * hunger)/hungerMax, healthbar.height));
         attentionbar.crop(new Phaser.Rectangle(0, 0, (attentionbarWidth * attention)/attentionMax, attentionbar.height));
     }
