@@ -45,7 +45,7 @@ window.onload = function () {
         game.load.image('healthbar', 'assets/healthbar_bar.png');
         game.load.image('healthbarBackground', 'assets/healthbar_background.png');
         game.load.image('attentionbar', 'assets/healthbar_bar2.png');
-        
+        game.load.image('redBar', 'assets/red_bar.png');
         //Pause and game over screens
         game.load.image('pause_button', 'assets/pause_button.png');
         game.load.image('pauseScreen', 'assets/pause_screen.png');
@@ -60,6 +60,12 @@ window.onload = function () {
     var healthbar;
     var healthbarBackground;
     var healthbarWidth;
+    var hungerIsRed = false;
+    var hungerIsGreen = true;
+    var attentionIsRed = false;
+    var attentionIsGreen = true;
+    var redBarLimit = 600;
+    
     var pauseScreen;
     var gameoverScreen;
     var restartButton;
@@ -340,7 +346,6 @@ window.onload = function () {
     
     function pause()
     {
-       
         pauseScreen.visible = true;
         game.paused = true;
     }
@@ -401,7 +406,6 @@ window.onload = function () {
         gameoverScreen = game.add.image(250,250,'winScreen');
         gameoverScreen.fixedToCamera = true;
         gameoverScreen.anchor.setTo(0.5, 0.5);           
-        
         restartButton = game.add.image(250, 290, 'restartButton');
         restartButton.scale.setTo(0.5, 0.5);
         restartButton.fixedToCamera = true;
@@ -644,6 +648,35 @@ window.onload = function () {
     {
         hungerText.text = 'HUNGER ' ;
         attentionText.text = 'ATTENTION SPAN ';
+        if(hunger <= redBarLimit && !hungerIsRed)
+        {
+            healthbar.loadTexture('redBar'); 
+            hungerIsRed = true;
+            hungerIsGreen = false;
+        }
+        else if(hunger > redBarLimit && !hungerIsGreen)
+        {
+            healthbar.loadTexture('healthbar');
+            hungerIsRed = false;
+            hungerIsGreen = true;
+            
+        }
+        
+        if(attention <= redBarLimit && !attentionIsRed)
+        {
+            attentionbar.loadTexture('redBar'); 
+            attentionIsRed = true;
+            attentionIsGreen = false;
+        }
+        else if(attention > redBarLimit && !attentionIsGreen)
+        {
+            attentionbar.loadTexture('healthbar');
+            attentionIsRed = false;
+            attentionIsGreen = true;
+            
+        }
+        
+        
         healthbar.crop(new Phaser.Rectangle(0, 0, (healthbarWidth * hunger)/hungerMax, healthbar.height));
         attentionbar.crop(new Phaser.Rectangle(0, 0, (attentionbarWidth * attention)/attentionMax, attentionbar.height));
     }
