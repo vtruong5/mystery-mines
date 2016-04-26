@@ -54,6 +54,17 @@ window.onload = function () {
         game.load.image('winScreen', 'assets/win_screen.png');
         //start menu
         game.load.image('menu', 'assets/menu.png');
+        //music
+        game.load.audio('explode', 'assets/explode.wav'); //for bomb collision
+        game.load.audio('boost', 'assets/boost.wav'); //for food collision
+        game.load.audio('goodchest', 'assets/goodchest.wav'); //for opening "good" chest
+        game.load.audio('badchest', 'assets/badchest.wav'); //for opening "bad" chest
+        game.load.audio('gemsound', 'assets/gemsound.wav') ; //for picking up gem 
+        game.load.audio('batsound', 'assets/batsound.wav') ; //for colliding with bats 
+        game.load.audio('dead', 'assets/dead.wav') ; //for being dead 
+        game.load.audio('cheer', 'assets/cheer.mp3'); //for winning 
+        game.load.audio('mapsound', 'assets/mapsound.wav'); //for picking up maps; 
+                    
     }
     
     
@@ -130,6 +141,16 @@ window.onload = function () {
     //start menu
     var menu;
     
+    //audio
+    var explode; 
+    var boost;
+    var goodchest;
+    var badchest; 
+    var gemsound; 
+    var batsound;
+    var dead; 
+    var cheer;
+    var mapsound; 
     
     function create() 
     {
@@ -334,6 +355,17 @@ window.onload = function () {
         menu = game.add.image(0,0,'menu');
         game.paused = true;
         this.game.input.onDown.add(restart,this);
+        
+        //Add audio
+        explode = game.add.audio('explode'); explode.volume = 1;
+        boost = game.add.audio('boost'); boost.volume = 1; 
+        goodchest = game.add.audio('goodchest'); goodchest.volume = 1;
+        badchest = game.add.audio('badchest'); badchest.volume = 1; 
+        gemsound = game.add.audio('gemsound'); gemsound.volume = 1; 
+        batsound = game.add.audio('batsound'); batsound.volume = 1; 
+        dead = game.add.audio('dead'); dead.volume = 1; 
+        cheer = game.add.cheer('cheer'); cheer.volume = 1; 
+        mapsound = game.add.mapsound('mapsound') ; mapsound.volume = 1; 
     }
     
     
@@ -361,6 +393,7 @@ window.onload = function () {
     
     function gameOver()
     {
+        dead.play();
         attention = 0;
         hunger = 0;
         message.text = 'GAMEOVER. SCORE = ' + score;
@@ -398,6 +431,7 @@ window.onload = function () {
     }
     
     function gameWin(){
+        cheer.play(); 
         message.text = 'WIN. SCORE = ' + score;
         
         p.animations.stop();
@@ -480,7 +514,7 @@ window.onload = function () {
     
     //kill dirt
     function groundCollision (o1, o2) 
-    {
+    { 
         o2.kill();
         attention = attention - (1/2);
         hunger = hunger - (1);
@@ -495,6 +529,7 @@ window.onload = function () {
     
     function bombCollision(o1, o2)
     {
+        explode.play();
         hunger = hunger - (1/5);
         attention = attention - (1/100);
         bombTime = bombTime + 1;
@@ -520,16 +555,19 @@ window.onload = function () {
            var effect = 10;
            if(rnd > 90){
                //speed up
+               goodchest.play(); 
                speed = speed+100;
                message.text = 'Opened a chest. Found speed potion. Speed + 100';
            }
            else if(rnd > 80){
                //speed down
+               badchest.play(); 
                speed = speed - 50;
                message.text = 'Opened a chest. Injured by spider. Speed - 100';
            }
            else if(rnd > 50){
                //attention up
+               goodchest.play(); 
                effect = 100;
                if(rnd > 60){
                 message.text = 'Opened a chest. Found green gems.';
@@ -543,11 +581,13 @@ window.onload = function () {
            }
            else if(rnd > 10){
                //attention down
+               badchest.play(); 
                effect = -100;
                 message.text = 'Opened a chest. Found nothing.';
            }
            else{
                //food up
+                goodchest.play(); 
                 message.text = 'Opened a chest. Found potatoes.';
                 hunger = hunger + 100;
                if(hunger > hungerMax){
@@ -574,6 +614,7 @@ window.onload = function () {
     {
         if (key1.isDown)
         {        
+            gemsound.play(); 
             o2.kill();     
             message.text = 'Yay! Treasure!';
            attention = attention + 5;
@@ -588,6 +629,7 @@ window.onload = function () {
     {
         //player gets more hungry
         //score affected
+        batsound.play(); 
         message.text = 'OUCH!';
         hunger = hunger - 50;
         attention = attention - 50;
@@ -603,6 +645,7 @@ window.onload = function () {
         if (key1.isDown)
         {
             f.kill();
+            boost.play();
             message.text = 'Yummy!';
             
            hunger = hunger + 100;
@@ -617,6 +660,7 @@ window.onload = function () {
     {
         if (key1.isDown)
         {
+            mapsound.play(); 
             piece.kill();
             message.text = 'Found map piece.';
             mapPieceCount++;
