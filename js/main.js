@@ -18,9 +18,6 @@ window.onload = function () {
     
     function preload() 
     {
-       
-        game.load.audio('background_music','assets/background_music.mp3');
-        game.load.audio('intense_music','assets/intense_music.mp3');
         //characters
         //game.load.spritesheet('player', 'assets/player.png', 32, 32); 
         game.load.spritesheet('player', 'assets/player_small.png', 25, 25);
@@ -71,33 +68,15 @@ window.onload = function () {
     }
     
     
-    var backgroundMusic;
-    var intenseMusic;
-    var closeToMapPiece1;
-    var closeToMapPiece2;
-    var closeToMapPiece3;
-    var closeToMapPiece4;
-    var closeToPieceText;
-    var playingAgain = false;
-    var p1X;
-    var p1Y;
-    var p2X;
-    var p2Y;
-    var p3X;
-    var p3Y;
-    var p4X;
-    var p4Y;
-    var firstTimeIntenseMusicPlays;
-    var menuIsActive;
-    
     var healthbar;
     var healthbarBackground;
     var healthbarWidth;
-    var hungerIsRed;
-    var hungerIsGreen;
-    var attentionIsRed;
-    var attentionIsGreen;
-    var redBarLimit;
+    var hungerIsRed = false;
+    var hungerIsGreen = true;
+    var attentionIsRed = false;
+    var attentionIsGreen = true;
+    var redBarLimit = 600;
+    
     var pauseScreen;
     var gameoverScreen;
     var restartButton;
@@ -149,7 +128,6 @@ window.onload = function () {
     var attention = 3000;
     var attentionMax = 3000;
     var attentionMax = 3000;
-    var piece;
     var score = 0;
     var speed = 200;
     
@@ -176,36 +154,10 @@ window.onload = function () {
     
     function create() 
     {
-       // game.load.audio('background_music', ['assets/background_music.wav', 'assets/background_music.wav']);
-        if(!playingAgain)
-        {       
-            backgroundMusic = game.add.audio('background_music');
-            backgroundMusic.play();
-            backgroundMusic.onStop.add(restartBackgroundMusic, this);
-            menuIsActive = true;
-        }
-        else
-        {
-             restartBackgroundMusic();
-             backgroundMusic.onStop.add(restartBackgroundMusic, this);
-             menuIsActive = true;
-        }
         
-        intenseMusic = game.add.audio('intense_music');  
-            intenseMusic.onStop.add(restartIntenseMusic, this);
-            firstTimeIntenseMusicPlays = true;
-    
-       /* else
-        {
-            intenseMusic.mute = true;
-            intenseMusic.restart();
-            intenseMusic.onStop.add(restartIntenseMusic, this);
-            firstTimeIntenseMusicPlays = true;
-        }*/
-       
-    
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.stage.backgroundColor = '#000000';
+        
         
         //make world
         map = game.add.tilemap('map');
@@ -223,24 +175,11 @@ window.onload = function () {
         
         //add map pieces
         map = game.add.physicsGroup();
-        p1X = game.rnd.between(0, 40)*32;
-        p1Y = game.rnd.between(0, 40)*32;
-        piece = map.create(p1X,p1Y, 'map');
-      
-        
-        p2X = game.rnd.between(60, 99)*32;
-        p2Y = game.rnd.between(0, 40)*32;
-        piece = map.create(p2X,p2Y, 'map');
-        
-        
-        p3X = game.rnd.between(0, 40)*32;
-        p3Y = game.rnd.between(60, 99)*32;
-        piece = map.create(p3X,p3Y, 'map');
+        var piece = map.create(game.rnd.between(0, 50)*32,game.rnd.between(0, 50)*32, 'map');
+        piece = map.create(game.rnd.between(49, 99)*32,game.rnd.between(0, 50)*32, 'map');
+        piece = map.create(game.rnd.between(0, 50)*32,game.rnd.between(49, 99)*32, 'map');
+        piece = map.create(game.rnd.between(49, 99)*32,game.rnd.between(49, 99)*32, 'map');
  
-        
-        p4X = game.rnd.between(60, 99)*32;
-        p4Y = game.rnd.between(60, 99)*32;
-        piece = map.create(p4X,p4Y, 'map');
         //var piece = map.create(1500,1500, 'map');
         //piece = map.create(1550, 1500, 'map');
         //piece = map.create(1600, 1500, 'map');
@@ -344,7 +283,7 @@ window.onload = function () {
         p.animations.add('left', [6, 7, 8], 10, true);         
         
         //game camera
-        game.camera.follow(p);   
+        game.camera.follow(p);     
         
         //controls
         cursors = game.input.keyboard.createCursorKeys();
@@ -362,7 +301,7 @@ window.onload = function () {
         message.font = 'Arial Black';
         message.fixedToCamera = true;
         
-       location = game.add.text(10, 10, 'X: ' + p.x + ' Y: ' + p.y, { fontSize: '10px', fill: '#fff' });
+        location = game.add.text(10, 10, 'X: ' + p.x + ' Y: ' + p.y, { fontSize: '10px', fill: '#fff' });
         location.fontSize = 15;
         location.font = 'Arial Black';
         location.fixedToCamera = true;
@@ -396,51 +335,24 @@ window.onload = function () {
         attentionText.font = 'Arial';
         attentionText.fixedToCamera = true;            
         
-        hungerIsRed = false;
-        hungerIsGreen = true;
-        attentionIsRed = false;
-        attentionIsGreen = true;
-        redBarLimit = 500;
-        
-        
-        
         //Add pause button
         
         pauseButton = this.game.add.image(450, 450, 'pause_button');
         pauseButton.scale.setTo(0.05, 0.05);
         pauseButton.fixedToCamera = true;
         pauseButton.inputEnabled = true;
-        pauseButton.visible = false;
         pauseButton.events.onInputUp.add(pause,this);
         this.game.input.onDown.add(unpause,this);
-            
-        //Add close text
-        closeToPieceText = game.add.text(110, 120, 'There is a map piece nearby!', { fontSize: '10px', fill: 'white' });
-        closeToPieceText.fontSize = 20;
-        closeToPieceText.font = 'Comic Sans MS';
-        closeToPieceText.fixedToCamera = true; 
-        closeToPieceText.visible = false;
-        closeToMapPiece1 = false;
-        closeToMapPiece2 = false;
-        closeToMapPiece3 = false;
-        closeToMapPiece4 = false;
-       
         
-          
+        
          //Add pause screen
         pauseScreen = game.add.image(250,250,'pauseScreen');
         pauseScreen.fixedToCamera = true;
         pauseScreen.anchor.setTo(0.5, 0.5);
         pauseScreen.visible = false;
         
-        
         //Add menu
         menu = game.add.image(0,0,'menu');
-<<<<<<< HEAD
-        menu.fixedToCamera = true;
-        this.game.input.onDown.add(killMenu,this);
-        
-=======
         game.paused = true;
         this.game.input.onDown.add(restart,this);
         
@@ -454,27 +366,15 @@ window.onload = function () {
         dead = game.add.audio('dead'); dead.volume = 1; 
         cheer = game.add.cheer('cheer'); cheer.volume = 1; 
         mapsound = game.add.mapsound('mapsound') ; mapsound.volume = 1; 
->>>>>>> origin/gh-pages
     }
     
     
-    function restartBackgroundMusic(sound)
+     function restart()
     {
-        backgroundMusic.restart();
-    }
-
-    function restartIntenseMusic(sound)
-    {
-        intenseMusic.restart();
+        menu.visible = false;
+        game.paused = false;
     }
     
-
-    function killMenu()
-    {
-         menu.visible = false;
-        pauseButton.visible = true;
-        menuIsActive = false;
-    }
     
     function pause()
     {
@@ -500,8 +400,7 @@ window.onload = function () {
         
         p.animations.stop();
         p.body.velocity.setTo(0, 0);
-       // intenseMusic.stop();
-       // backgroundMusic.stop();
+       
         
         gameoverScreen = game.add.image(250,250,'gameoverScreen');
         gameoverScreen.fixedToCamera = true;
@@ -514,108 +413,9 @@ window.onload = function () {
         restartButton.inputEnabled = true;
         pauseButton.inputEnabled = false;      
         gameover = true;   
-        
+     
     }
     
-    function getsInCloseRange1()
-    {
-        closeToPieceText.visible = true;
-        closeToMapPiece1 = true;
-        backgroundMusic.pause();
-        if(firstTimeIntenseMusicPlays)
-        {
-            firstTimeIntenseMusicPlays = false;
-            intenseMusic.play();
-        }
-        else
-        {
-             intenseMusic.resume();
-        }
-    }
-    
-    function leavesCloseRange1()
-    {
-        closeToPieceText.visible = false;
-        closeToMapPiece1 = false;
-        intenseMusic.pause();
-        backgroundMusic.resume();
-    }
-    
-    function getsInCloseRange2()
-    {
-        closeToPieceText.visible = true;
-        closeToMapPiece2 = true;
-        backgroundMusic.pause();
-        if(firstTimeIntenseMusicPlays)
-        {
-            firstTimeIntenseMusicPlays = false;
-            intenseMusic.play();
-        }
-        else
-        {
-             intenseMusic.resume();
-        }
-    }
-    
-    function leavesCloseRange2()
-    {
-        closeToPieceText.visible = false;
-        closeToMapPiece2 = false;
-        intenseMusic.pause();
-        backgroundMusic.resume();
-       // closeToMapPiece = false;
-    }
-    
-    function getsInCloseRange3()
-    {
-        closeToPieceText.visible = true;
-        closeToMapPiece3 = true;
-        backgroundMusic.pause();
-        if(firstTimeIntenseMusicPlays)
-        {
-            firstTimeIntenseMusicPlays = false;
-            intenseMusic.play();
-        }
-        else
-        {
-             intenseMusic.resume();
-        }
-    }
-    
-    function leavesCloseRange3()
-    {
-        closeToPieceText.visible = false;
-        closeToMapPiece3 = false;
-        intenseMusic.pause();
-        backgroundMusic.resume();
-       // closeToMapPiece = false;
-    }
-    
-    function getsInCloseRange4()
-    {
-        closeToPieceText.visible = true;
-        closeToMapPiece4 = true;
-        backgroundMusic.pause();
-        if(firstTimeIntenseMusicPlays)
-        {
-            firstTimeIntenseMusicPlays = false;
-            intenseMusic.play();
-        }
-        else
-        {
-             intenseMusic.resume();
-        }
-    }
-    
-    function leavesCloseRange4()
-    {
-        closeToPieceText.visible = false;
-        closeToMapPiece4 = false;
-        intenseMusic.pause();
-        backgroundMusic.resume();
-       
-       // closeToMapPiece = false;
-    }
     function restartGame()
     {
         attention = 3000;
@@ -627,9 +427,7 @@ window.onload = function () {
         oldBombTime = 0;     
         mapPieceCount = 0;
         gameover = false;
-        playingAgain = true;
         game.state.restart();
-        
     }
     
     function gameWin(){
@@ -673,78 +471,39 @@ window.onload = function () {
             p.body.velocity.x = 0;
             p.body.velocity.y = 0;
             
-            if(!menuIsActive)
-            {
-                if (cursors.left.isDown){
-                    p.body.velocity.x = -(speed);
-                    p.animations.play('left');
-                }
-                else if (cursors.right.isDown){
-                    p.body.velocity.x = speed;
-                    p.animations.play('right');
-                }
-                else if (cursors.up.isDown){
-                    p.body.velocity.y = -(speed);
-                    p.animations.play('up');
-                }
-                else if (cursors.down.isDown){
-                    p.body.velocity.y = speed;
-                    p.animations.play('down');
-                }
-                else{
-                    //  Stand still
-                    p.animations.stop();
-                    //p.frame = 2;
-                } 
-
-                time++;
-                if(time%100 == 0)
-                {
-                    hunger = hunger - (1/2);
-                    attention--;
-                }
+            if (cursors.left.isDown){
+                p.body.velocity.x = -(speed);
+                p.animations.play('left');
             }
+            else if (cursors.right.isDown){
+                p.body.velocity.x = speed;
+                p.animations.play('right');
+            }
+            else if (cursors.up.isDown){
+                p.body.velocity.y = -(speed);
+                p.animations.play('up');
+            }
+            else if (cursors.down.isDown){
+                p.body.velocity.y = speed;
+                p.animations.play('down');
+            }
+            else{
+                //  Stand still
+                p.animations.stop();
+                //p.frame = 2;
+            } 
+
+            time++;
+            if(time%100 == 0){
+                hunger = hunger - (1/2);
+                attention--;
+            }
+
             checkStats();
 
             //location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y) + ' time: ' + time;
             location.text = 'X: ' + Math.floor(p.x) + ' Y: ' + Math.floor(p.y);
             updateStats();
-            
-            if((game.math.distance(p.x, p.y, p1X, p1Y) < 300) && closeToMapPiece1 == false)
-            {
-                getsInCloseRange1();
-            }
-            if((game.math.distance(p.x, p.y, p2X, p2Y) < 300) && closeToMapPiece2 == false)
-            {
-                getsInCloseRange2();
-            }
-            if((game.math.distance(p.x, p.y, p3X, p3Y) < 300) && closeToMapPiece3 == false)
-            {
-                getsInCloseRange3();
-            }
-            if((game.math.distance(p.x, p.y, p4X, p4Y) < 300) && closeToMapPiece4 == false)
-            {
-                getsInCloseRange4();
-            }
-            
-            
-            if((game.math.distance(p.x, p.y, p1X, p1Y) > 300) && closeToMapPiece1 == true)
-            {
-                leavesCloseRange1();
-            }
-            if((game.math.distance(p.x, p.y, p2X, p2Y) > 300) && closeToMapPiece2 == true)
-            {
-                leavesCloseRange2();
-            }
-            if((game.math.distance(p.x, p.y, p3X, p3Y) > 300) && closeToMapPiece3 == true)
-            {
-                leavesCloseRange3();
-            }
-            if((game.math.distance(p.x, p.y, p4X, p4Y) > 300) && closeToMapPiece4 == true)
-            {
-                leavesCloseRange4();
-            }
-            
         }
         else
         {
@@ -901,30 +660,7 @@ window.onload = function () {
     {
         if (key1.isDown)
         {
-<<<<<<< HEAD
-            if(closeToMapPiece1 == true)
-            {
-                p1X = -500;
-                p1Y = -500;
-            }
-            if(closeToMapPiece2 == true)
-            {
-                p2X = -500;
-                p2Y = -500;
-            }
-            if(closeToMapPiece3 == true)
-            {
-                p3X = -500;
-                p3Y = -500;
-            }
-            if(closeToMapPiece4 == true)
-            {
-                p4X = -500;
-                p4Y = -500;
-            }
-=======
             mapsound.play(); 
->>>>>>> origin/gh-pages
             piece.kill();
             message.text = 'Found map piece.';
             mapPieceCount++;
@@ -978,7 +714,7 @@ window.onload = function () {
         }
         else if(attention > redBarLimit && !attentionIsGreen)
         {
-            attentionbar.loadTexture('attentionbar');
+            attentionbar.loadTexture('healthbar');
             attentionIsRed = false;
             attentionIsGreen = true;
             
