@@ -54,6 +54,7 @@ window.onload = function () {
         game.load.image('gameoverScreen', 'assets/gameover_screen.png');
         game.load.image('restartButton', 'assets/restart_button.png');
         game.load.image('winScreen', 'assets/win_screen.png');
+        game.load.image('fullscreenButton', 'assets/fullscreen_button.png');
         //start menu
         game.load.image('menu', 'assets/menu.png');
         //music
@@ -69,6 +70,7 @@ window.onload = function () {
                     
     }
     
+    var fullscreenButton;
     var backgroundMusic;
     var intenseMusic;
     var closeToMapPiece1;
@@ -177,6 +179,7 @@ window.onload = function () {
     
     function create() 
     {
+        
         if(!playingAgain)
         {       
             backgroundMusic = game.add.audio('background_music');
@@ -398,13 +401,21 @@ window.onload = function () {
         redBarLimit = 500;
         //Add pause button
         
-        pauseButton = this.game.add.image(450, 450, 'pause_button');
-        pauseButton.scale.setTo(0.05, 0.05);
+        pauseButton = this.game.add.image(415, 463, 'pause_button');
+        pauseButton.scale.setTo(0.04, 0.04);
         pauseButton.fixedToCamera = true;
         pauseButton.inputEnabled = true;
         pauseButton.visible = false;
         pauseButton.events.onInputUp.add(pause,this);
         this.game.input.onDown.add(unpause,this);
+        
+        //add fullscreen button
+        fullscreenButton = this.game.add.image(460, 463, 'fullscreenButton');
+        fullscreenButton.scale.setTo(0.25, 0.25);
+        fullscreenButton.fixedToCamera = true;
+        fullscreenButton.inputEnabled = true;
+        fullscreenButton.visible = false;
+        fullscreenButton.events.onInputUp.add(goFullscreen,this);
         
         //Add close text
         closeToPieceText = game.add.text(110, 120, 'There is a map piece nearby!', { fontSize: '10px', fill: 'white' });
@@ -441,6 +452,7 @@ window.onload = function () {
         cheer = game.add.audio('cheer'); cheer.volume = 0.3; 
         mapsound = game.add.audio('mapsound') ; mapsound.volume = 0.3;
         
+       game.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
         
     }
     
@@ -459,7 +471,21 @@ window.onload = function () {
     {
         menu.visible = false;
         pauseButton.visible = true;
+        fullscreenButton.visible = true;
         menuIsActive = false;
+    }
+    
+    function goFullscreen() 
+    {
+
+        if (game.scale.isFullScreen)
+        {
+            game.scale.stopFullScreen();
+        }
+        else
+        {
+            game.scale.startFullScreen(false);
+        }
     }
     
     function pause()
