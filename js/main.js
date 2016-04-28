@@ -151,10 +151,9 @@ window.onload = function () {
     var hungerMax = 3000;
     var attention = 3000;
     var attentionMax = 3000;
-    var attentionMax = 3000;
     var piece;
     var score = 0;
-    var speed = 200;
+    var speed = 250;
     
     var gameover = false;
     //var dirtCount = 0;
@@ -355,41 +354,41 @@ window.onload = function () {
         bar.fixedToCamera = true;
         
         //text
-        message = game.add.text(10, 470, 'move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
+        message = game.add.text(10, 470, 'Move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
         message.fontSize = 15;
-        message.font = 'Arial Black';
+        message.font = 'Comic Sans MS';
         message.fixedToCamera = true;
         
         location = game.add.text(10, 10, 'X: ' + p.x + ' Y: ' + p.y, { fontSize: '10px', fill: '#fff' });
         location.fontSize = 15;
-        location.font = 'Arial Black';
+        location.font = 'Comic Sans MS';
         location.fixedToCamera = true;
         
         mapText = game.add.text(360, 10, 'Map Pieces: ' + mapPieceCount + '/4', { fontSize: '10px', fill: '#fff' });
         mapText.fontSize = 15;
-        mapText.font = 'Arial Black';
+        mapText.font = 'Comic Sans MS';
         mapText.fixedToCamera = true;        
         
         //Add healthbar background and bar
-        healthbarBackground = game.add.image(10,50,'healthbarBackground');
+        healthbarBackground = game.add.image(0,40,'healthbarBackground');
         healthbarBackground.fixedToCamera = true;     
         healthbar = game.add.image(healthbarBackground.x+5,healthbarBackground.y+5,'healthbar');
         healthbar.fixedToCamera = true;
         healthbarWidth = healthbar.width;
         
         //Add attentionbar background and bar
-        attentionbarBackground = game.add.image(10,90,'healthbarBackground');
+        attentionbarBackground = game.add.image(0,68,'healthbarBackground');
         attentionbarBackground.fixedToCamera = true;     
         attentionbar = game.add.image(attentionbarBackground.x+5,attentionbarBackground.y+5,'attentionbar');
         attentionbar.fixedToCamera = true;
         attentionbarWidth = attentionbar.width;
         
         //hunger bar and attention bar text
-        hungerText = game.add.text(20, 58, 'HUNGER ', { fontSize: '10px', fill: '#fff' });
+        hungerText = game.add.text(healthbarBackground.x+10, healthbarBackground.y+8, 'HUNGER ', { fontSize: '10px', fill: '#fff' });
         hungerText.fontSize = 10;
         hungerText.font = 'Arial';
         hungerText.fixedToCamera = true;    
-        attentionText = game.add.text(20, 98, 'ATTENTION SPAN ', { fontSize: '10px', fill: '#fff' });
+        attentionText = game.add.text(attentionbarBackground.x+10, attentionbarBackground.y+8, 'ATTENTION SPAN ', { fontSize: '10px', fill: '#fff' });
         attentionText.fontSize = 10;
         attentionText.font = 'Arial';
         attentionText.fixedToCamera = true;            
@@ -630,8 +629,10 @@ window.onload = function () {
         {
             intenseMusic.pause();
         }
-        
-        
+          
+        speed = 250;
+        attentionMax = 3000;
+        hungerMax = 3000;
         attention = 3000;
         hunger = 3000;
         gameover = false;
@@ -713,7 +714,7 @@ window.onload = function () {
                 time++;
                 if(time%100 == 0)
                 {
-                    hunger = hunger - (1/2);
+                    hunger = hunger - (1/4);
                     attention--;
                 }
             }
@@ -769,7 +770,7 @@ window.onload = function () {
     function groundCollision (o1, o2)
     {
         o2.kill();
-        attention = attention - (1/2);
+        attention = attention - (1);
         hunger = hunger - (1);
     }
 
@@ -786,7 +787,8 @@ window.onload = function () {
         hunger = hunger - (1/5);
         attention = attention - (1/100);
         bombTime = bombTime + 1;
-        if(bombTime == 20){
+        if(bombTime == 20)
+        {
             //animate
              explode.play();
             addAni = game.add.sprite(o2.x-20, o2.y-50, 'fire');   
@@ -795,42 +797,49 @@ window.onload = function () {
             o2.kill();
             bombTime = 0; 
             hunger = hunger - 150;
-            message.text = 'Oops!';         
+            message.text = 'Oops!'; 
         }            
     }    
     
    function itemCollision (o1, o2) {
-       if(key1.isDown){
+       if(key1.isDown)
+       {
            addAni = game.add.sprite(o2.x-40, o2.y-25, 'chestAni');                
            animate = addAni.animations.add('chestAction');
            addAni.animations.play('chestAction', 50, false);        
            o2.kill();     
            var rnd = game.rnd.between(0, 100);
            var effect = 10;
-           if(rnd > 90){
+           if(rnd > 90)
+           {
                //speed up
                goodchest.play(); 
                speed = speed+100;
-               message.text = 'Opened a chest. Found speed potion. Speed + 100';
+               message.text = 'Found speed potion. Speed + 100!';
            }
-           else if(rnd > 80){
+           else if(rnd > 85)
+           {
                //speed down
                badchest.play(); 
                speed = speed - 50;
-               message.text = 'Opened a chest. Injured by spider. Speed - 100';
+               message.text = 'Injured by spider. Speed - 50!';
            }
-           else if(rnd > 50){
+           else if(rnd > 50)
+           {
                //attention up
-               goodchest.play(); 
-               effect = 100;
-               if(rnd > 60){
-                message.text = 'Opened a chest. Found green gems.';
-               }
-               else if(rnd > 70){
-                message.text = 'Opened a chest. Found yellow gems.';
-               }
-               else{
-                message.text = 'Opened a chest. Found purple gems.';
+                goodchest.play(); 
+                effect = 100;
+                if(rnd > 60)
+                {
+                   message.text = 'Opened a chest. Found green gems.';
+                }
+                else if(rnd > 70)
+                {
+                    message.text = 'Opened a chest. Found yellow gems.';
+                }
+                else
+                {
+                    message.text = 'Opened a chest. Found purple gems.';
                 }
            }
            else if(rnd > 10){
@@ -870,8 +879,8 @@ window.onload = function () {
         {        
             gemsound.play(); 
             o2.kill();     
-            message.text = 'Yay! Treasure!';
-           attention = attention + 5;
+            message.text = 'Yay! Gems!';
+           attention = attention + 20;
            if(attention > attentionMax){
                attention = attentionMax;
            }
@@ -940,12 +949,20 @@ window.onload = function () {
             message.text = 'Found map piece.';
             mapPieceCount++;
             mapText.text = 'Map Pieces: ' + mapPieceCount + '/4';
-           attention = attention + 100;
-           if(attention > attentionMax){
+            attention = attention + 100;
+            hunger = hunger + 500;
+            if(attention > attentionMax)
+            {
                attention = attentionMax;
-           }
+            }
+          
+            if(hunger > hungerMax)
+            {
+               hunger = hungerMax;
+            }   
             score = score + 200;
-            if(mapPieceCount == 4){
+            if(mapPieceCount == 4)
+            {
                 mapText.text = 'X:' + endX + ' Y:' + endY;
                 endPrize.visible = true;
             }
