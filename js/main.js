@@ -27,6 +27,7 @@ window.onload = function () {
         game.load.tilemap('map', 'assets/test.json', null, Phaser.Tilemap.TILED_JSON);
         game.load.image('tile1', 'assets/tile1.png');
         game.load.image('tile2', 'assets/tile2.png');
+        game.load.image('dark', 'assets/dark.png')
         //enemy
         game.load.spritesheet('bat', 'assets/enemy_sheet.png', 32, 32, 3);        
         //objects
@@ -245,7 +246,7 @@ window.onload = function () {
         
         //add food
         foods = game.add.physicsGroup();
-        for(var i = 0; i < 9; i++){
+        for(var i = 0; i < 20; i++){
             var f = foods.create(game.rnd.between(0, 99)*32,game.rnd.between(0, 99)*32, 'food');
         }        
         var f = foods.create(1700,1700, 'food');
@@ -321,14 +322,14 @@ window.onload = function () {
         } 
         
         //make enemies
-        var y = 2400
+        var y = 32*5;
         enemies = game.add.physicsGroup();
-        for(var i = 0; i < 5; i++){
+        for(var i = 0; i < 20; i++){
             var e = enemies.create(game.world.randomX, y, 'bat');
             e.body.velocity.x = game.rnd.between(200, 400);
             var move = e.animations.add('fly');
             e.animations.play('fly',10, true);            
-            y += 128;
+            y += 32*5;
         }
     
         //make player
@@ -352,6 +353,10 @@ window.onload = function () {
         var b = bar.create(0, -60, 'bar');
         b = bar.create(0, 460, 'bar');
         bar.fixedToCamera = true;
+        
+        //darkness
+        var darkness = game.add.sprite(0, 0, 'dark');
+        darkness.fixedToCamera = true;
         
         //text
         message = game.add.text(10, 470, 'Move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
