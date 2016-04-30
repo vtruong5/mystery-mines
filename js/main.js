@@ -177,6 +177,7 @@ window.onload = function () {
     var cheer;
     var mapsound; 
     
+    
     function create() 
     {
         
@@ -322,7 +323,7 @@ window.onload = function () {
         } 
         
         //make enemies
-        var y = 32*5;
+        var y = 32*4;
         enemies = game.add.physicsGroup();
         for(var i = 0; i < 20; i++){
             var e = enemies.create(game.world.randomX, y, 'bat');
@@ -359,19 +360,19 @@ window.onload = function () {
         darkness.fixedToCamera = true;
         
         //text
-        message = game.add.text(10, 470, 'Move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
+        message = game.add.text(10, 476, 'Move with arrow keys and action with [ Z ]', { fontSize: '10px', fill: '#fff' });
         message.fontSize = 15;
-        message.font = 'Comic Sans MS';
+        message.font = 'Inconsolata';
         message.fixedToCamera = true;
         
         location = game.add.text(10, 10, 'X: ' + p.x + ' Y: ' + p.y, { fontSize: '10px', fill: '#fff' });
         location.fontSize = 15;
-        location.font = 'Comic Sans MS';
+        location.font = 'Inconsolata';
         location.fixedToCamera = true;
         
         mapText = game.add.text(360, 10, 'Map Pieces: ' + mapPieceCount + '/4', { fontSize: '10px', fill: '#fff' });
         mapText.fontSize = 15;
-        mapText.font = 'Comic Sans MS';
+        mapText.font = 'Inconsolata';
         mapText.fixedToCamera = true;        
         
         //Add healthbar background and bar
@@ -389,13 +390,13 @@ window.onload = function () {
         attentionbarWidth = attentionbar.width;
         
         //hunger bar and attention bar text
-        hungerText = game.add.text(healthbarBackground.x+10, healthbarBackground.y+8, 'HUNGER ', { fontSize: '10px', fill: '#fff' });
-        hungerText.fontSize = 10;
-        hungerText.font = 'Arial';
+        hungerText = game.add.text(healthbarBackground.x+10, healthbarBackground.y+11, 'HUNGER ', { fontSize: '10px', fill: '#fff' });
+        hungerText.fontSize = 12;
+        hungerText.font = 'Inconsolata';
         hungerText.fixedToCamera = true;    
-        attentionText = game.add.text(attentionbarBackground.x+10, attentionbarBackground.y+8, 'ATTENTION SPAN ', { fontSize: '10px', fill: '#fff' });
-        attentionText.fontSize = 10;
-        attentionText.font = 'Arial';
+        attentionText = game.add.text(attentionbarBackground.x+10, attentionbarBackground.y+11, 'ATTENTION SPAN ', { fontSize: '10px', fill: '#fff' });
+        attentionText.fontSize = 12;
+        attentionText.font = 'Inconsolata';
         attentionText.fixedToCamera = true;            
         
         hungerIsRed = false;
@@ -424,7 +425,7 @@ window.onload = function () {
         //Add close text
         closeToPieceText = game.add.text(110, 120, 'There is a map piece nearby!', { fontSize: '10px', fill: 'white' });
         closeToPieceText.fontSize = 20;
-        closeToPieceText.font = 'Comic Sans MS';
+        closeToPieceText.font = 'Inconsolata';
         closeToPieceText.fixedToCamera = true; 
         closeToPieceText.visible = false;
         closeToMapPiece1 = false;
