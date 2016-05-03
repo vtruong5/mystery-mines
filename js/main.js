@@ -148,8 +148,8 @@ window.onload = function () {
     
     //in game stats
     var mapPieceCount = 0;
-    var hunger = 4000;
-    var hungerMax = 4000;
+    var hunger = 4200;
+    var hungerMax = 4200;
     var attention = 3000;
     var attentionMax = 3000;
     var piece;
@@ -235,8 +235,8 @@ window.onload = function () {
         piece = map.create(p3X,p3Y, 'map');
  
         
-        p4X = 2700;
-        p4Y = 2700;
+        p4X = 84*32;
+        p4Y = 84*32;
         //p4X = game.rnd.between(60, 99)*32;
         //p4Y = game.rnd.between(60, 99)*32;
         piece = map.create(p4X,p4Y, 'map');
@@ -639,9 +639,9 @@ window.onload = function () {
           
         speed = 250;
         attentionMax = 3000;
-        hungerMax = 4000;
+        hungerMax = 4200;
         attention = 3000;
-        hunger = 4000;
+        hunger = 4200;
         gameover = false;
         score = 0;
         time = 0; 
